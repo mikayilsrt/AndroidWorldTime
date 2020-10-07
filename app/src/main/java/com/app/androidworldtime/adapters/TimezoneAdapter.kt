@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.app.androidworldtime.R
+import com.app.androidworldtime.views.location.LocationActivity
 import kotlinx.android.synthetic.main.timezone_item.view.*
 
 class TimezoneAdapter(
@@ -28,6 +29,10 @@ class TimezoneAdapter(
     inner class ViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
         fun bind(timezone: String) {
             view._timezone.text = timezone
+
+            view.setOnClickListener {
+                LocationActivity.start(view.context, timezone)
+            }
         }
     }
 }
