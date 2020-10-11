@@ -4,9 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import com.app.androidworldtime.datas.models.Location
 import com.app.androidworldtime.datas.services.ServiceObject
 import com.app.androidworldtime.datas.services.TimezoneService
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.core.Observer
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.TimeUnit
 
 class TimezoneRepository {
 
@@ -33,13 +38,23 @@ class TimezoneRepository {
     }
 
     fun loadLocation(location: String) {
-        timezoneService.getLocation(location).enqueue(object: Callback<Location> {
-            override fun onFailure(call: Call<Location>, t: Throwable) = Unit
-
-            override fun onResponse(call: Call<Location>, response: Response<Location>) {
-                this@TimezoneRepository._location.value = response.body()
+        timezoneService.getLocation(location)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .repeatWhen {
+                it.delay(1, TimeUnit.SECONDS)
             }
-        })
+            .subscribe(object: Observer<Location> {
+                override fun onComplete() = Unit
+
+                override fun onSubscribe(d: Disposable?) = Unit
+
+                override fun onNext(t: Location?) {
+                    this@TimezoneRepository._location.value = t
+                }
+
+                override fun onError(e: Throwable?) = Unit
+            })
     }
 
 }
