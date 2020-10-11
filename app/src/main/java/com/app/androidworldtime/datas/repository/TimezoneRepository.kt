@@ -8,9 +8,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.core.Observer
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.concurrent.TimeUnit
 
 class TimezoneRepository {
@@ -28,13 +25,20 @@ class TimezoneRepository {
     }
 
     fun loadTimezone() {
-        timezoneService.getTimezone().enqueue(object: Callback<List<String>> {
-            override fun onFailure(call: Call<List<String>>, t: Throwable) = Unit
+        timezoneService.getTimezone()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object: Observer<List<String>> {
+                override fun onComplete() = Unit
 
-            override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
-                this@TimezoneRepository._timezone.value = response.body() ?: listOf()
-            }
-        })
+                override fun onSubscribe(d: Disposable?) = Unit
+
+                override fun onNext(t: List<String>?) {
+                    this@TimezoneRepository._timezone.value = t
+                }
+
+                override fun onError(e: Throwable?) = Unit
+            })
     }
 
     fun loadLocation(location: String) {
