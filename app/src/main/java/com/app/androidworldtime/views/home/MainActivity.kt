@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.androidworldtime.R
 import com.app.androidworldtime.adapters.TimezoneAdapter
+import com.app.androidworldtime.datas.repository.TimezoneRepository
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -19,7 +20,10 @@ class MainActivity : AppCompatActivity() {
 
         this.initialRecyclerView()
 
-        val homeActivityViewModelFactory: HomeActivityViewModelFactory = HomeActivityViewModelFactory(this)
+        val timezoneRepository: TimezoneRepository = TimezoneRepository()
+        timezoneRepository.loadTimezone()
+
+        val homeActivityViewModelFactory: HomeActivityViewModelFactory = HomeActivityViewModelFactory(timezoneRepository)
         val homeActivityViewModel: HomeActivityViewModel = ViewModelProvider(this, homeActivityViewModelFactory).get(HomeActivityViewModel::class.java)
 
         homeActivityViewModel.getTimezone().observe(this, Observer {
