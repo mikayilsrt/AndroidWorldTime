@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.app.androidworldtime.R
+import com.app.androidworldtime.datas.repository.TimezoneRepository
 import kotlinx.android.synthetic.main.activity_location.*
 
 class LocationActivity : AppCompatActivity() {
@@ -27,7 +28,10 @@ class LocationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location)
 
-        val locationActivityViewModelFactory: LocationActivityViewModelFactory = LocationActivityViewModelFactory(this, locationExtra ?: "")
+        val timezoneRepository: TimezoneRepository = TimezoneRepository()
+        timezoneRepository.loadLocation(locationExtra ?: "")
+
+        val locationActivityViewModelFactory: LocationActivityViewModelFactory = LocationActivityViewModelFactory(timezoneRepository)
         val locationActivityViewModel: LocationActivityViewModel = ViewModelProvider(this, locationActivityViewModelFactory).get(LocationActivityViewModel::class.java)
 
         locationActivityViewModel.getLocation().observe(this, Observer {

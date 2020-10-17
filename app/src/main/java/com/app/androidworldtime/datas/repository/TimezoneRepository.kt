@@ -1,5 +1,6 @@
 package com.app.androidworldtime.datas.repository
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.app.androidworldtime.datas.models.Location
 import com.app.androidworldtime.datas.services.ServiceObject
@@ -20,7 +21,7 @@ class TimezoneRepository {
     }
 
     private val _location: MutableLiveData<Location> = MutableLiveData()
-    fun getLocation(): MutableLiveData<Location> {
+    fun getLocation(): LiveData<Location> {
         return this._location
     }
 
