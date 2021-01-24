@@ -12,7 +12,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var timezoneAdapter: TimezoneAdapter
+    private var timezoneAdapter: TimezoneAdapter? = null
+    private var timezoneRepository: TimezoneRepository? = null
+    private var homeActivityViewModel: HomeActivityViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,15 +22,33 @@ class MainActivity : AppCompatActivity() {
 
         this.initialRecyclerView()
 
-        val timezoneRepository: TimezoneRepository = TimezoneRepository()
-        timezoneRepository.loadTimezone()
+        this.timezoneRepository = TimezoneRepository()
 
-        val homeActivityViewModelFactory: HomeActivityViewModelFactory = HomeActivityViewModelFactory(timezoneRepository)
-        val homeActivityViewModel: HomeActivityViewModel = ViewModelProvider(this, homeActivityViewModelFactory).get(HomeActivityViewModel::class.java)
+        val homeActivityViewModelFactory: HomeActivityViewModelFactory = HomeActivityViewModelFactory(timezoneRepository!!)
+        this.homeActivityViewModel = ViewModelProvider(this, homeActivityViewModelFactory).get(HomeActivityViewModel::class.java)
+    }
 
-        homeActivityViewModel.getTimezone().observe(this, Observer {
-            this.timezoneAdapter.timezoneList = it
-            this.timezoneAdapter.notifyDataSetChanged()
+    override fun onResume() {
+        super.onResume()
+
+        if (this.timezoneRepository != null)
+            this.timezoneRepository?.loadTimezone()
+
+        this.observeTimezoneList()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this.timezoneAdapter = null
+        this.timezoneRepository = null
+        this.homeActivityViewModel = null
+    }
+
+    private fun observeTimezoneList() {
+        this.homeActivityViewModel!!.getTimezone().observe(this, Observer {
+            this.timezoneAdapter?.timezoneList = it
+            this.timezoneAdapter?.notifyDataSetChanged()
         })
     }
 
