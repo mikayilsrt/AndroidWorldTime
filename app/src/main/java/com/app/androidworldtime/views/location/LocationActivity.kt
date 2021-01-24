@@ -24,17 +24,38 @@ class LocationActivity : AppCompatActivity() {
         intent.getStringExtra(EXTRA_LOCATION)
     }
 
+    private var timezoneRepository: TimezoneRepository? = null
+
+    private var locationActivityViewModel: LocationActivityViewModel? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location)
 
-        val timezoneRepository: TimezoneRepository = TimezoneRepository()
-        timezoneRepository.loadLocation(locationExtra ?: "")
+        this.timezoneRepository = TimezoneRepository()
 
-        val locationActivityViewModelFactory: LocationActivityViewModelFactory = LocationActivityViewModelFactory(timezoneRepository)
-        val locationActivityViewModel: LocationActivityViewModel = ViewModelProvider(this, locationActivityViewModelFactory).get(LocationActivityViewModel::class.java)
+        val locationActivityViewModelFactory: LocationActivityViewModelFactory = LocationActivityViewModelFactory(this.timezoneRepository!!)
+        this.locationActivityViewModel = ViewModelProvider(this, locationActivityViewModelFactory).get(LocationActivityViewModel::class.java)
+    }
 
-        locationActivityViewModel.getLocation().observe(this, Observer {
+    override fun onResume() {
+        super.onResume()
+
+        if (this.timezoneRepository != null)
+            timezoneRepository!!.loadLocation(locationExtra ?: "")
+
+        this.observeLocation()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this.timezoneRepository = null
+        this.locationActivityViewModel = null
+    }
+
+    private fun observeLocation() {
+        this.locationActivityViewModel!!.getLocation().observe(this, Observer {
             _datetime.text = it.datetime.toString()
         })
     }
